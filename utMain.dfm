@@ -16,6 +16,7 @@ object fmMain: TfmMain
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Position = poDesktopCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
@@ -80,6 +81,7 @@ object fmMain: TfmMain
       Height = 21
       Caption = #1080#1079#1084#1077#1085#1080#1090#1100'...'
       TabOrder = 3
+      OnClick = btnSelect2Click
     end
     object edPath3: TEdit
       Left = 16
@@ -115,7 +117,6 @@ object fmMain: TfmMain
       Alignment = taCenter
       Caption = #1056#1059#1057#1048#1060#1048#1062#1048#1056#1054#1042#1040#1053
       Color = clWhite
-      Enabled = False
       Font.Charset = RUSSIAN_CHARSET
       Font.Color = clGreen
       Font.Height = -24
@@ -173,6 +174,12 @@ object fmMain: TfmMain
     Top = 265
     Width = 417
     Height = 19
-    Panels = <>
+    Panels = <
+      item
+        Alignment = taRightJustify
+        Bevel = pbRaised
+        Text = 'by SCRIBE (_scribe_@ukr.net) for www.nlm.im'
+        Width = 200
+      end>
   end
 end

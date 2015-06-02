@@ -25,10 +25,13 @@ type
     Button3: TButton;
     StatusBar1: TStatusBar;
     procedure btnSelect1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure btnSelect2Click(Sender: TObject);
   private
     { Private declarations }
   public
-    { Public declarations }
+    gamePath, rusPath, originPath : string;
+    gPCorrect, rPCorrect, oPCorrect: boolean;
   end;
 
 var
@@ -36,15 +39,43 @@ var
 
 implementation
 
+uses utFuncs, FWZipReader;
+
 {$R *.dfm}
 
 procedure TfmMain.btnSelect1Click(Sender: TObject);
 var
   dir: string;
 begin
-	if SelectDirectory('', '', dir)
-  then ShowMessage('Выбранный каталог = '+dir)
-  else ShowMessage('Выбор каталога прервался');
+  if SelectDirectory('', '', dir) then
+  begin
+  	if DirectoryExists(dir) then
+    begin
+    	// TODO Сделать реальную проверку папки с игрой!
+	    fmMain.gamePath:= dir;
+      gpCorrect:= true;
+    end
+    else
+      MessageBox(handle,PChar('Данный путь недоступен!'+#13#10), PChar('Ошибка'), 16);
+  end;
+end;
+
+procedure TfmMain.FormCreate(Sender: TObject);
+begin
+	utFuncs.Init;
+end;
+
+procedure TfmMain.btnSelect2Click(Sender: TObject);
+var
+	openDlg: TOpenDialog;
+begin
+	openDlg:= TOpenDialog.Create(fmMain);
+  openDlg.Filter:= 'Zip архив|*.zip';
+  openDlg.Title:= 'Выберите архив с русификатором.';
+  openDlg.Options:= openDlg.Options + [ofFileMustExist];
+	openDlg.InitialDir:= ExtractFilePath(Application.ExeName);
+  openDlg.Execute;
 end;
 
 end.
+

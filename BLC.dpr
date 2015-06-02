@@ -2,7 +2,8 @@ program BLC;
 
 uses
   Forms,
-  utMain in 'utMain.pas' {fmMain};
+  utMain in 'utMain.pas' {fmMain},
+  utFuncs in 'utFuncs.pas';
 
 {$R *.res}
 
