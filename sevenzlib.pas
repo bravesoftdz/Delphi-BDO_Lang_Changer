@@ -13,7 +13,7 @@
 (* V1.2                                                                         *)
 (********************************************************************************)
 
-unit sevenzip;
+unit sevenzlib;
 {$ALIGN ON}
 {$MINENUMSIZE 4}
 {$WARN SYMBOL_PLATFORM OFF}	
