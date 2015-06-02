@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, FileCtrl, IniFiles;
+  Dialogs, StdCtrls, ComCtrls, FileCtrl, IniFiles, sevenzip;
 
 type
   TfmMain = class(TForm)
@@ -39,7 +39,7 @@ var
 
 implementation
 
-uses utFuncs, FWZipReader;
+uses utFuncs;
 
 {$R *.dfm}
 
