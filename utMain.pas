@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, FileCtrl, IniFiles, sevenzip;
+  Dialogs, StdCtrls, ComCtrls, FileCtrl, IniFiles, sevenzlib;
 
 type
   TfmMain = class(TForm)
@@ -73,8 +73,18 @@ begin
   openDlg.Filter:= 'Zip архив|*.zip';
   openDlg.Title:= 'Выберите архив с русификатором.';
   openDlg.Options:= openDlg.Options + [ofFileMustExist];
-	openDlg.InitialDir:= ExtractFilePath(Application.ExeName);
-  openDlg.Execute;
+  if (edPath2.Text<>'') and (DirectoryExists(ExtractFilePath(edPath2.Text))) then
+  begin
+  	openDlg.InitialDir:= ExtractFilePath(edPath2.Text);
+	end
+  else
+  begin
+		openDlg.InitialDir:= ExtractFilePath(Application.ExeName);
+  end;
+  if openDlg.Execute then
+  begin
+  	
+  end;
 end;
 
 end.
