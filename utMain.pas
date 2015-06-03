@@ -29,6 +29,7 @@ type
     procedure btnSelect2Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnCheckStsClick(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -122,6 +123,11 @@ begin
     lblStatus.Caption := 'ОРИГИНАЛЬНЫЙ';
     lblStatus.Font.Color := RGB(255, 128, 0);
   end;
+end;
+
+procedure TfmMain.Button4Click(Sender: TObject);
+begin
+	MessageBox(handle,PChar(infostr), PChar('Краткая справка.'), 64);
 end;
 
 end.

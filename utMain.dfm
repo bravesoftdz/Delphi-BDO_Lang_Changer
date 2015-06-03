@@ -112,6 +112,7 @@ object fmMain: TfmMain
       Height = 17
       Caption = '?'
       TabOrder = 6
+      OnClick = Button4Click
     end
   end
   object GroupBox2: TGroupBox
