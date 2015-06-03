@@ -1,11 +1,11 @@
 object fmMain: TfmMain
-  Left = 461
-  Top = 344
+  Left = 445
+  Top = 334
   VertScrollBar.Visible = False
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'BDO Lang Changer v1.0'
-  ClientHeight = 284
+  ClientHeight = 244
   ClientWidth = 417
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,13 +17,14 @@ object fmMain: TfmMain
   OldCreateOrder = False
   Position = poDesktopCenter
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
     Width = 401
-    Height = 145
+    Height = 105
     Caption = #1055#1091#1090#1080
     TabOrder = 0
     object lblPath1: TLabel
@@ -39,13 +40,6 @@ object fmMain: TfmMain
       Width = 215
       Height = 13
       Caption = #1055#1091#1090#1100' '#1082' '#1092#1072#1081#1083#1091' '#1088#1091#1089#1080#1092#1080#1082#1072#1090#1086#1088#1072'('#1092#1072#1081#1083' '#1072#1088#1093#1080#1074#1072'):'
-    end
-    object lblPath3: TLabel
-      Left = 16
-      Top = 96
-      Width = 179
-      Height = 13
-      Caption = #1055#1091#1090#1100' '#1082' '#1087#1072#1087#1082#1077' '#1086#1088#1075#1080#1085#1072#1083#1100#1085#1099#1093' '#1092#1072#1081#1083#1086#1074':'
     end
     object edPath1: TEdit
       Left = 16
@@ -83,40 +77,60 @@ object fmMain: TfmMain
       TabOrder = 3
       OnClick = btnSelect2Click
     end
-    object edPath3: TEdit
-      Left = 16
-      Top = 110
-      Width = 297
-      Height = 21
-      Color = clWhite
+    object gpInd: TPanel
+      Left = 3
+      Top = 33
+      Width = 12
+      Height = 15
+      BevelInner = bvLowered
+      BevelOuter = bvNone
+      BorderStyle = bsSingle
+      Caption = '+'
+      Color = clRed
+      Ctl3D = False
+      ParentCtl3D = False
       TabOrder = 4
-      Text = 'D:\My files\BDO Backup'
     end
-    object btnSelect3: TButton
-      Left = 312
-      Top = 110
-      Width = 75
-      Height = 21
-      Caption = #1080#1079#1084#1077#1085#1080#1090#1100'...'
+    object rpInd: TPanel
+      Left = 3
+      Top = 73
+      Width = 12
+      Height = 15
+      BevelInner = bvLowered
+      BevelOuter = bvNone
+      BorderStyle = bsSingle
+      Caption = '+'
+      Color = clRed
+      Ctl3D = False
+      ParentCtl3D = False
       TabOrder = 5
+    end
+    object Button4: TButton
+      Left = 368
+      Top = 9
+      Width = 17
+      Height = 17
+      Caption = '?'
+      TabOrder = 6
     end
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Top = 160
+    Top = 120
     Width = 401
     Height = 97
     Caption = #1057#1090#1072#1090#1091#1089
     TabOrder = 1
     object lblStatus: TLabel
       Left = 2
-      Top = 64
+      Top = 66
       Width = 397
-      Height = 31
+      Height = 29
       Align = alBottom
       Alignment = taCenter
-      Caption = #1056#1059#1057#1048#1060#1048#1062#1048#1056#1054#1042#1040#1053
+      Caption = '--//--'
       Color = clWhite
+      Enabled = False
       Font.Charset = RUSSIAN_CHARSET
       Font.Color = clGreen
       Font.Height = -24
@@ -126,7 +140,7 @@ object fmMain: TfmMain
       ParentFont = False
       Transparent = True
     end
-    object Button1: TButton
+    object btnCheckSts: TButton
       Left = 8
       Top = 16
       Width = 123
@@ -139,6 +153,7 @@ object fmMain: TfmMain
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 0
+      OnClick = btnCheckStsClick
     end
     object Button2: TButton
       Left = 138
@@ -171,7 +186,7 @@ object fmMain: TfmMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 265
+    Top = 225
     Width = 417
     Height = 19
     Panels = <
