@@ -17,6 +17,8 @@ function DeleteOrigin: boolean;
 function UnPackRUS: boolean;
 function CopyRUS: boolean;
 function RecoverOrigin: boolean;
+function GetNewestDir(const path: string): string;
+function DeleteDirdEx(const path: string): boolean;
 
 const
   gameFiles: array[0..2] of string = ('\paz\PAD00001.PAZ', '\paz\pad00000.meta',
@@ -177,6 +179,20 @@ begin
   Result := True;
 end;
 
+function DeleteDirdEx(const path: string): boolean;
+var
+  lpFileOp: TSHFileOpStruct;
+begin
+  Result := false;
+  FillChar(lpFileOp, SizeOf(lpFileOp), 0);
+  lpFileOp.Wnd := utMain.fmMain.Handle;
+  lpFileOp.wFunc := FO_DELETE;
+  lpFileOp.pFrom := PChar(path);
+  lpFileOp.fFlags := FOF_NOCONFIRMATION;
+  if SHFileOperation(lpFileOp) = 0 then
+    Result := true;
+end;
+
 // Проверка статуса русификации
 
 function CheckStatus: integer;
@@ -186,7 +202,8 @@ begin
   begin
     if utMain.fmMain.gamePath[length(utMain.fmMain.gamePath)] <> '\' then
       utMain.fmMain.gamePath := utMain.fmMain.gamePath + '\';
-    if not FileExists(utMain.fmMain.gamePath + 'paz\pad00000.meta.bak') then
+    if not FileExists(utMain.fmMain.gamePath + 'paz\pad00000.meta.bak') or
+      not DirectoryExists(utMain.fmMain.gamePath + 'prestringtable\kr') then
     begin
       Result := 0;
     end
@@ -460,41 +477,144 @@ begin
   end;
 end;
 
+function GetDirTime(const Dir: string): TDateTime;
+var
+  H: Integer;
+  F: TFileTime;
+  S: TSystemTime;
+begin
+  H := CreateFile(PChar(Dir), $0080, 0, nil, OPEN_EXISTING,
+    FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if H <> -1 then
+  begin
+    GetFileTime(H, @F, nil, nil);
+    FileTimeToLocalFileTime(F, F);
+    FileTimeToSystemTime(F, S);
+    Result := SystemTimeToDateTime(S);
+    CloseHandle(H);
+  end
+  else
+    Result := -1;
+end;
+
 function RecoverOrigin: boolean;
+var
+  patchDir, patchDirName: string;
 begin
   Result := false;
   CheckPaths;
   ShowCheck;
-  if utMain.fmMain.gPCorrect and utMain.fmMain.glStatus = 1 then
+  if utMain.fmMain.gPCorrect then
   begin
-  	if FileExists(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ') then
-    	if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ') then
-				MessageBox(utMain.fmMain.Handle, PChar('Ошибка удаления файла PAD00001.PAZ' + #13#10), PChar('Ошибка'), 16);
-
+    // Удаление русификатора
+    if FileExists(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ') then
+      if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ')
+        then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления файла PAD00001.PAZ';
     if FileExists(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ.bak') then
-    	if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ.bak') then
-				MessageBox(utMain.fmMain.Handle, PChar('Ошибка удаления файла PAD00001.PAZ.bak' + #13#10), PChar('Ошибка'), 16);
+      if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ.bak')
+        then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления файла PAD00001.PAZ.bak';
+    if FileExists(utMain.fmMain.gamePath + 'paz\pad00000.meta') then
+      if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\pad00000.meta')
+        then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления файла pad00000.meta';
+    if FileExists(utMain.fmMain.gamePath + 'paz\pad00000.meta.bak') then
+      if not SysUtils.DeleteFile(utMain.fmMain.gamePath +
+        'paz\pad00000.meta.bak') then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления файла pad00000.meta.bak';
+    if FileExists(utMain.fmMain.gamePath + 'service.ini') then
+      if not SysUtils.DeleteFile(utMain.fmMain.gamePath + 'service.ini') then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления файла service.ini';
+    if DirectoryExists(utMain.fmMain.gamePath + 'prestringtable') then
+      if not DeleteDirdEx(utMain.fmMain.gamePath + 'prestringtable') then
+        utMain.fmMain.StatusBar1.Panels[0].Text :=
+          '* ошибка удаления папки prestringtable';
 
-
-  	if SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ') and
-    	SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ.bak') and
-      SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\pad00000.meta') and
-      SysUtils.DeleteFile(utMain.fmMain.gamePath + 'paz\pad00000.meta.bak')and
-      RemoveDirEx(utMain.fmMain.gamePath + 'prestringtable') and
-      DeleteFile(PChar(utMain.fmMain.gamePath + 'service.ini')) then
+    // Копирование исходных файлов
+    patchDirName := GetNewestDir(ExtractFilePath(ParamStr(0)) + '\patch\');
+    patchDir := ExtractFilePath(ParamStr(0)) + '\patch\' + patchDirName;
+    //ShowMessage(patchDir);
+    if DirectoryExists(patchDir) then
     begin
+      if FileExists(patchDir + '\paz\PAD00001.PAZ') and
+        FileExists(patchDir + '\paz\pad00000.meta') and
+        FileExists(patchDir + '\service.ini') then
+      begin
+        if CopyFile(PChar(patchDir + '\paz\PAD00001.PAZ'),
+          PChar(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ'), false) and
+          CopyFile(PChar(patchDir + '\paz\pad00000.meta'),
+          PChar(utMain.fmMain.gamePath + 'paz\pad00000.meta'), false) and
+          CopyFile(PChar(patchDir + '\service.ini'), PChar(utMain.fmMain.gamePath
+          + 'service.ini'), false) then
+        begin
+          Result := true;
+        end
+        else
+        begin
+          MessageBox(utMain.fmMain.Handle,
+            PChar('Не удалось скопировать исходные файлы. У вас нет прав, или еще что-то...'
+            + #13#10),
+            PChar('Ошибка'), 16);
+        end;
+      end
+      else
+      begin
+        MessageBox(utMain.fmMain.Handle,
+          PChar('Последняя созданная папка с исходными файлами пуста или в ней нехватает некоторых файлов!'
+          + #13#10 +
+          'Удалите эту папку, если она была создана ваши вручную, или паникуйте! =)' +
+          #13#10), PChar('Ошибка'), 16);
+      end;
     end
     else
     begin
-    	if not FileExists(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ')
+      MessageBox(utMain.fmMain.Handle,
+        PChar('Не удалось найти папку с исходными файлами!' + #13#10 +
+        'Все очень плохо=)' + #13#10), PChar('Ошибка'), 16);
     end;
   end
   else
   begin
-  	MessageBox(utMain.fmMain.Handle, PChar('Восстановить можно только русифицированную версию игры!' +
+    MessageBox(utMain.fmMain.Handle,
+      PChar('Восстановить можно только русифицированную версию игры!' +
       #13#10),
       PChar('Ошибка'), 16);
   end;
+end;
+
+function GetNewestDir(const path: string): string;
+var
+  sr: TSearchRec;
+  lastDir, currDir: string;
+  lastTime, currTime: TDateTime;
+begin
+  Result := '';
+  if FindFirst(Path + '*.*', faAnyFile, sr) = 0 then
+  begin
+    repeat
+      if (sr.Attr and faDirectory) <> 0 then // если найденный файл - папка
+      begin
+        if (sr.Name <> '.') and (sr.Name <> '..') then
+        begin
+          currDir := sr.Name;
+          currTime := GetDirTime(path + currDir);
+          if currTime > lastTime then
+          begin
+            lastTime := currTime;
+            lastDir := currDir;
+          end;
+        end;
+      end;
+    until FindNext(sr) <> 0;
+  end;
+  FindClose(sr.FindHandle);
+  Result := lastDir;
 end;
 
 end.

@@ -44,24 +44,24 @@ type
 resourcestring
   infostr = 'Black Desert Online Lang Changer v1.0' + #13#10 +
     'by SCRIBE. Kyiv. 2015. Гильдия - Nephilims Legacy (www.nlm.im), www.scribe-soft.at.ua' + #13#10
-      +
+    +
     'Данная утилита предназначена для быстрой установки русификатора/восстановления для популярной игры Black Desert Online(Корея).' + #13#10
-      +
+    +
     'Русификаторы можно скачать отсюда: ' + #13#10 +
     'Это не самостоятельная программа, она НЕ проверяет версию игры или русификатора и т.д.' + #13#10
-      +
+    +
     'Вы сами выбиратете что устанавливать.' + #13#10 +
     'Была создана для удобства (не вручную распаковывать/копировать/хранить файлы).' + #13#10
-      + #13#10 +
+    + #13#10 +
     'Технические подробности:' + #13#10 +
     '1. Оригинальные файлы игры находяться в папке с самой программой (patch/dd-mm-yyyy--random).' + #13#10
-      +
+    +
     '2. Последний использованный русификатор(распакованный) тут (temp/)' + #13#10
-      +
+    +
     '3. ОБЯЗАТЕЛЬНО. Первый раз запускать для НЕ русифицированной игры(чтобы программа скопировала оригинальные файлы)' + #13#10
-      +
+    +
     '4. Заточена под структуру архива русификатора, если что либо поменяеться, она просто не сработает. Тогда ко мне=)' + #13#10
-      +
+    +
     'Приятного использования! Aх да, на свой страх и риск=)';
 
 var
@@ -180,6 +180,7 @@ end;
 
 procedure TfmMain.btnRUSClick(Sender: TObject);
 begin
+	Screen.Cursor := crHourGlass;
   if glStatus = 0 then
   begin
     if CopyOrigin then
@@ -196,25 +197,26 @@ begin
   else if glStatus = 1 then
   begin
     MessageBox(handle, PChar('Игра уже русифицированна!' + #13#10 +
-      'Для повторной/новой русификации восстановите игру.'), PChar('Ошибка'), 48);
+      'Для повторной/новой русификации восстановите игру.'), PChar('Ошибка'),
+        48);
   end
   else
     MessageBox(handle, PChar('Сначала проверьте статус русицикации!' + #13#10),
       PChar('Ошибка'), 16);
+  Screen.Cursor := crDefault;
 end;
 
 procedure TfmMain.btnRecoverClick(Sender: TObject);
 begin
-    if RecoverOrigin then
-    begin
-      btnCheckSts.Click;
-    end
-    else
-    begin
-    	lblStatus.Enabled := true;
-      lblStatus.Caption := 'GAME OVER =)';
-      lblStatus.Font.Color := RGB(255, 0, 0);
-    end;
+  if RecoverOrigin then
+  begin
+    btnCheckSts.Click;
+  end
+  else
+  begin
+    lblStatus.Enabled := true;
+    lblStatus.Caption := 'GAME OVER =)';
+    lblStatus.Font.Color := RGB(255, 0, 0);
   end;
 end;
 
