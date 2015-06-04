@@ -5,13 +5,13 @@ object fmMain: TfmMain
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'BDO Lang Changer v1.0'
-  ClientHeight = 244
+  ClientHeight = 261
   ClientWidth = 417
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Font.Charset = RUSSIAN_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Name = 'Verdana'
   Font.Style = []
   FormStyle = fsStayOnTop
   OldCreateOrder = False
@@ -30,14 +30,14 @@ object fmMain: TfmMain
     object lblPath1: TLabel
       Left = 16
       Top = 16
-      Width = 62
+      Width = 73
       Height = 13
       Caption = #1055#1091#1090#1100' '#1082' '#1080#1075#1088#1077':'
     end
     object lblPath2: TLabel
       Left = 16
       Top = 56
-      Width = 215
+      Width = 257
       Height = 13
       Caption = #1055#1091#1090#1100' '#1082' '#1092#1072#1081#1083#1091' '#1088#1091#1089#1080#1092#1080#1082#1072#1090#1086#1088#1072'('#1092#1072#1081#1083' '#1072#1088#1093#1080#1074#1072'):'
     end
@@ -47,6 +47,7 @@ object fmMain: TfmMain
       Width = 297
       Height = 21
       Color = clWhite
+      ReadOnly = True
       TabOrder = 0
       Text = 'D:\Games\Black Desert'
     end
@@ -65,6 +66,7 @@ object fmMain: TfmMain
       Width = 297
       Height = 21
       Color = clWhite
+      ReadOnly = True
       TabOrder = 2
       Text = 'D:\My Files\BDORUS-master.zip'
     end
@@ -146,7 +148,7 @@ object fmMain: TfmMain
       Top = 16
       Width = 123
       Height = 41
-      Caption = #1059#1079#1085#1072#1090#1100' '#1089#1090#1072#1090#1091#1089
+      Caption = #1055#1088#1086#1074#1077#1088#1080#1090#1100' '#1089#1090#1072#1090#1091#1089
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -156,7 +158,7 @@ object fmMain: TfmMain
       TabOrder = 0
       OnClick = btnCheckStsClick
     end
-    object Button2: TButton
+    object btnRUS: TButton
       Left = 138
       Top = 16
       Width = 123
@@ -169,8 +171,9 @@ object fmMain: TfmMain
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 1
+      OnClick = btnRUSClick
     end
-    object Button3: TButton
+    object btnRecover: TButton
       Left = 268
       Top = 16
       Width = 123
@@ -183,19 +186,28 @@ object fmMain: TfmMain
       Font.Style = [fsBold]
       ParentFont = False
       TabOrder = 2
+      OnClick = btnRecoverClick
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 225
+    Top = 242
     Width = 417
     Height = 19
     Panels = <
       item
         Alignment = taRightJustify
         Bevel = pbRaised
-        Text = 'by SCRIBE (_scribe_@ukr.net) for www.nlm.im'
+        Text = 'by SCRIBE (_scribe_@ukr.net)'
         Width = 200
       end>
+  end
+  object cbAutoStatus: TCheckBox
+    Left = 8
+    Top = 224
+    Width = 233
+    Height = 17
+    Caption = #1040#1074#1090#1086#1087#1088#1086#1074#1077#1088#1082#1072' '#1089#1090#1072#1090#1091#1089#1072' '#1087#1088#1080' '#1079#1072#1087#1091#1089#1082#1077
+    TabOrder = 3
   end
 end
