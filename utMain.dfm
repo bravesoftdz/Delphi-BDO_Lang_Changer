@@ -20,7 +20,7 @@ object fmMain: TfmMain
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object GroupBox1: TGroupBox
+  object gbPath: TGroupBox
     Left = 8
     Top = 8
     Width = 401
@@ -117,7 +117,7 @@ object fmMain: TfmMain
       OnClick = Button4Click
     end
   end
-  object GroupBox2: TGroupBox
+  object gbStatus: TGroupBox
     Left = 8
     Top = 120
     Width = 401
@@ -209,5 +209,9 @@ object fmMain: TfmMain
     Height = 17
     Caption = #1040#1074#1090#1086#1087#1088#1086#1074#1077#1088#1082#1072' '#1089#1090#1072#1090#1091#1089#1072' '#1087#1088#1080' '#1079#1072#1087#1091#1089#1082#1077
     TabOrder = 3
+  end
+  object XPManifest1: TXPManifest
+    Left = 24
+    Top = 24
   end
 end

@@ -3,13 +3,12 @@ unit utFuncs;
 interface
 
 uses utMain, sevenzlib, Dialogs, SysUtils, Classes, Windows, IniFiles,
-  DateUtils, ShellAPI;
+  DateUtils, ShellAPI, WinInet;
 
 procedure Init;
 procedure LoadSettings;
 procedure SaveSettings;
 function CheckRUS(const ruspath: string): boolean;
-function RemoveDirEx(sDir: string): Boolean;
 function CheckStatus: integer;
 procedure ShowCheck;
 function CopyOrigin: boolean;
@@ -19,10 +18,7 @@ function CopyRUS: boolean;
 function RecoverOrigin: boolean;
 function GetNewestDir(const path: string): string;
 function DeleteDirdEx(const path: string): boolean;
-
-const
-  gameFiles: array[0..2] of string = ('\paz\PAD00001.PAZ', '\paz\pad00000.meta',
-    '\service.ini');
+function GetInetFile(const fileURL, FileName: string): boolean;
 
 implementation
 
@@ -147,50 +143,94 @@ begin
   end;
 end;
 
-function RemoveDirEx(sDir: string): Boolean;
-var
-  iIndex: Integer;
-  SearchRec: TSearchRec;
-  sFileName: string;
-begin
-  Result := False;
-  sDir := sDir + '\*.*';
-  iIndex := FindFirst(sDir, faAnyFile, SearchRec);
-  while iIndex = 0 do
-  begin
-    sFileName := ExtractFileDir(sDir) + '\' + SearchRec.Name;
-    if SearchRec.Attr = faDirectory then
-    begin
-      if (SearchRec.Name <> '') and (SearchRec.Name <> '.') and (SearchRec.Name
-        <> '..') then
-        RemoveDirEx(sFileName);
-    end
-    else
-    begin
-      if SearchRec.Attr <> faArchive then
-        FileSetAttr(sFileName, faArchive);
-      if not DeleteFile(PChar(sFileName)) then
-        ShowMessage('Could NOT delete ' + sFileName);
-    end;
-    iIndex := FindNext(SearchRec);
-  end;
-  FindClose(SearchRec.FindHandle);
-  RemoveDir(ExtractFileDir(sDir));
-  Result := True;
-end;
+// Удаление папки со всем содержимым (средствами Windows)
 
 function DeleteDirdEx(const path: string): boolean;
 var
   lpFileOp: TSHFileOpStruct;
 begin
-  Result := false;
   FillChar(lpFileOp, SizeOf(lpFileOp), 0);
   lpFileOp.Wnd := utMain.fmMain.Handle;
   lpFileOp.wFunc := FO_DELETE;
   lpFileOp.pFrom := PChar(path);
   lpFileOp.fFlags := FOF_NOCONFIRMATION;
-  if SHFileOperation(lpFileOp) = 0 then
-    Result := true;
+  Result := (0 = SHFileOperation(lpFileOp)); // Элегантно, надо запомнить=)
+end;
+
+// Копирование папки со всем содержимым (средствами Windows)
+
+function CopyDir(fromDir, toDir: string): boolean;
+var
+  fos: TSHFileOpStruct;
+  todir2: string;
+begin
+  todir2 := todir;
+  ZeroMemory(@fos, SizeOf(fos));
+  with fos do
+  begin
+    wFunc := FO_COPY;
+    //fFlags := FOF_FILESONLY;
+    fFlags := FOF_SIMPLEPROGRESS;
+    fflags := fflags or FOF_NOCONFIRMATION;
+    fflags := fflags or FOF_SILENT;
+    pFrom := PChar(fromDir + #0);
+    pTo := PChar(toDir2);
+  end;
+  Result := (0 = ShFileOperation(fos));
+end;
+
+// Возвращает время создания папки
+
+function GetDirTime(const Dir: string): TDateTime;
+var
+  H: Integer;
+  F: TFileTime;
+  S: TSystemTime;
+begin
+  H := CreateFile(PChar(Dir), $0080, 0, nil, OPEN_EXISTING,
+    FILE_FLAG_BACKUP_SEMANTICS, 0);
+  if H <> -1 then
+  begin
+    GetFileTime(H, @F, nil, nil);
+    FileTimeToLocalFileTime(F, F);
+    FileTimeToSystemTime(F, S);
+    Result := SystemTimeToDateTime(S);
+    CloseHandle(H);
+  end
+  else
+    Result := -1;
+end;
+
+// Возвращает имя последней созданной папки в директории
+
+function GetNewestDir(const path: string): string;
+var
+  sr: TSearchRec;
+  lastDir, currDir: string;
+  lastTime, currTime: TDateTime;
+begin
+  Result := '';
+  lastTime := 0;
+  if FindFirst(Path + '*.*', faAnyFile, sr) = 0 then
+  begin
+    repeat
+      if (sr.Attr and faDirectory) <> 0 then // если найденный файл - папка
+      begin
+        if (sr.Name <> '.') and (sr.Name <> '..') then
+        begin
+          currDir := sr.Name;
+          currTime := GetDirTime(path + currDir);
+          if currTime > lastTime then
+          begin
+            lastTime := currTime;
+            lastDir := currDir;
+          end;
+        end;
+      end;
+    until FindNext(sr) <> 0;
+  end;
+  FindClose(sr.FindHandle);
+  Result := lastDir;
 end;
 
 // Проверка статуса русификации
@@ -224,25 +264,7 @@ begin
   end;
 end;
 
-function CopyDir(fromDir, toDir: string): boolean;
-var
-  fos: TSHFileOpStruct;
-  todir2: string;
-begin
-  todir2 := todir;
-  ZeroMemory(@fos, SizeOf(fos));
-  with fos do
-  begin
-    wFunc := FO_COPY;
-    //fFlags := FOF_FILESONLY;
-    fFlags := FOF_SIMPLEPROGRESS;
-    fflags := fflags or FOF_NOCONFIRMATION;
-    fflags := fflags or FOF_SILENT;
-    pFrom := PChar(fromDir + #0);
-    pTo := PChar(toDir2);
-  end;
-  Result := (0 = ShFileOperation(fos));
-end;
+// Копирование оригинальных файлов игры
 
 function CopyOrigin: boolean;
 var
@@ -300,9 +322,10 @@ begin
   end;
 end;
 
+// Удаление оригинальных файлов игры
+
 function DeleteOrigin: boolean;
 begin
-  Result := false;
   if SysUtils.DeleteFile(PChar(utMain.fmMain.gamePath + 'paz\PAD00001.PAZ')) and
     SysUtils.DeleteFile(PChar(utMain.fmMain.gamePath + 'paz\pad00000.meta')) and
     SysUtils.DeleteFile(PChar(utMain.fmMain.gamePath + 'service.ini')) then
@@ -318,6 +341,8 @@ begin
       #13#10), PChar('Ошибка'), 16);
   end;
 end;
+
+// Распаковка файлов русификатора
 
 function UnPackRUS: boolean;
 var
@@ -401,6 +426,8 @@ begin
   end;
 end;
 
+// Копирование файлов русификатора
+
 function CopyRUS: boolean;
 begin
   Result := false;
@@ -477,25 +504,7 @@ begin
   end;
 end;
 
-function GetDirTime(const Dir: string): TDateTime;
-var
-  H: Integer;
-  F: TFileTime;
-  S: TSystemTime;
-begin
-  H := CreateFile(PChar(Dir), $0080, 0, nil, OPEN_EXISTING,
-    FILE_FLAG_BACKUP_SEMANTICS, 0);
-  if H <> -1 then
-  begin
-    GetFileTime(H, @F, nil, nil);
-    FileTimeToLocalFileTime(F, F);
-    FileTimeToSystemTime(F, S);
-    Result := SystemTimeToDateTime(S);
-    CloseHandle(H);
-  end
-  else
-    Result := -1;
-end;
+// Восстановление исходных файлов
 
 function RecoverOrigin: boolean;
 var
@@ -588,34 +597,49 @@ begin
   end;
 end;
 
-function GetNewestDir(const path: string): string;
+// Закачка файла из интернета (возможно русификатора, на будущее)
+
+function GetInetFile(const fileURL, FileName: string): boolean;
+const
+  BufferSize = 1024;
 var
-  sr: TSearchRec;
-  lastDir, currDir: string;
-  lastTime, currTime: TDateTime;
+  hSession, hURL: HInternet;
+  Buffer: array[1..BufferSize] of Byte;
+  BufferLen: DWORD;
+  f: file;
+  sAppName: string;
 begin
-  Result := '';
-  if FindFirst(Path + '*.*', faAnyFile, sr) = 0 then
-  begin
-    repeat
-      if (sr.Attr and faDirectory) <> 0 then // если найденный файл - папка
-      begin
-        if (sr.Name <> '.') and (sr.Name <> '..') then
-        begin
-          currDir := sr.Name;
-          currTime := GetDirTime(path + currDir);
-          if currTime > lastTime then
-          begin
-            lastTime := currTime;
-            lastDir := currDir;
-          end;
-        end;
-      end;
-    until FindNext(sr) <> 0;
-  end;
-  FindClose(sr.FindHandle);
-  Result := lastDir;
+  Result := False;
+  sAppName := ExtractFileName(ParamStr(0));
+  hSession := InternetOpen(PChar(sAppName), INTERNET_OPEN_TYPE_PRECONFIG,
+    nil, nil, 0);
+  try
+    hURL := InternetOpenURL(hSession,
+      PChar(fileURL), nil, 0, 0, 0);
+    try
+      AssignFile(f, FileName);
+      Rewrite(f, 1);
+      repeat
+        InternetReadFile(hURL, @Buffer, SizeOf(Buffer), BufferLen);
+        BlockWrite(f, Buffer, BufferLen)
+      until BufferLen = 0;
+      CloseFile(f);
+      Result := True;
+    finally
+      InternetCloseHandle(hURL)
+    end
+  finally
+    InternetCloseHandle(hSession)
+  end
 end;
+
+//TODO
+{
+1. Соорудить парсинг сайта с русификатором.
+2. Проверять версию русификатора, который установлен и послдений на сайте.
+3. Скачивать последний русификатор если надо.
+4. Установить.
+}
 
 end.
 

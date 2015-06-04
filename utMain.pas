@@ -1,21 +1,37 @@
+{
+--------------------------------------------------------------------
+BDO Lang Changer v1.0
+
+Creator: SCRIBE
+First release date: 04.06.2015
+Created with Git.
+Contacts: neo-scribe@ukr.net|justscribe@yahoo.com skype: neo-scribe
+
+Описание:
+Создана для удобной и быстрой русификации файлов игры Blaсk Desert Online (корея)
+Возможно в будущем будет онлайн русификация.
+
+PROGRAM IS FREE FOR ANYTHING!=)
+--------------------------------------------------------------------
+}
 unit utMain;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, FileCtrl, ExtCtrls, DateUtils;
+  Dialogs, StdCtrls, ComCtrls, FileCtrl, ExtCtrls, DateUtils, XPMan;
 
 type
   TfmMain = class(TForm)
     edPath1: TEdit;
-    GroupBox1: TGroupBox;
+    gbPath: TGroupBox;
     lblPath1: TLabel;
     btnSelect1: TButton;
     lblPath2: TLabel;
     edPath2: TEdit;
     btnSelect2: TButton;
-    GroupBox2: TGroupBox;
+    gbStatus: TGroupBox;
     lblStatus: TLabel;
     btnCheckSts: TButton;
     btnRUS: TButton;
@@ -25,6 +41,7 @@ type
     rpInd: TPanel;
     Button4: TButton;
     cbAutoStatus: TCheckBox;
+    XPManifest1: TXPManifest;
     procedure btnSelect1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnSelect2Click(Sender: TObject);
@@ -180,7 +197,7 @@ end;
 
 procedure TfmMain.btnRUSClick(Sender: TObject);
 begin
-	Screen.Cursor := crHourGlass;
+  Screen.Cursor := crHourGlass;
   if glStatus = 0 then
   begin
     if CopyOrigin then
@@ -198,7 +215,7 @@ begin
   begin
     MessageBox(handle, PChar('Игра уже русифицированна!' + #13#10 +
       'Для повторной/новой русификации восстановите игру.'), PChar('Ошибка'),
-        48);
+      48);
   end
   else
     MessageBox(handle, PChar('Сначала проверьте статус русицикации!' + #13#10),

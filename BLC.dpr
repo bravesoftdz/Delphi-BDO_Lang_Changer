@@ -10,6 +10,6 @@ uses
 begin
   Application.Initialize;
   Application.CreateForm(TfmMain, fmMain);
+	Application.Title := 'BDO LC v1.0';
   Application.Run;
-  Application.Title := 'BDO LC v1.0';
 end.
